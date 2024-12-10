@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UI;
 
 #if UNITY_ADS
 using UnityEngine.Advertisements;
@@ -18,26 +17,26 @@ using UnityEngine.Analytics;
 /// </summary>
 public class GameState : AState
 {
-	static int s_DeadHash = Animator.StringToHash("Dead");
+    static int s_DeadHash = Animator.StringToHash("Dead");
 
     public Canvas canvas;
     public TrackManager trackManager;
 
-	public AudioClip gameTheme;
+    public AudioClip gameTheme;
 
     [Header("UI")]
     public Text coinText;
     public Text premiumText;
     public Text scoreText;
-	public Text distanceText;
+    public Text distanceText;
     public Text multiplierText;
-	public Text countdownText;
+    public Text countdownText;
     public RectTransform powerupZone;
-	public RectTransform lifeRectTransform;
+    public RectTransform lifeRectTransform;
 
-	public RectTransform pauseMenu;
-	public RectTransform wholeUI;
-	public Button pauseButton;
+    public RectTransform pauseMenu;
+    public RectTransform wholeUI;
+    public Button pauseButton;
 
     public Image inventoryIcon;
 
@@ -67,7 +66,7 @@ public class GameState : AState
     protected bool m_Finished;
     protected float m_TimeSinceStart;
     protected List<PowerupIcon> m_PowerupIcons = new List<PowerupIcon>();
-	protected Image[] m_LifeHearts;
+    protected Image[] m_LifeHearts;
 
     protected RectTransform m_CountdownRectTransform;
     protected bool m_WasMoving;
@@ -264,7 +263,7 @@ public class GameState : AState
 
                 Addressables.ReleaseInstance(toRemove[i].gameObject);
                 if (toRemoveIcon[i] != null)
-                   Destroy(toRemoveIcon[i].gameObject);
+                    Destroy(toRemoveIcon[i].gameObject);
 
                 chrCtrl.consumables.Remove(toRemove[i]);
                 m_PowerupIcons.Remove(toRemoveIcon[i]);
@@ -279,10 +278,10 @@ public class GameState : AState
         }
     }
 
-	void OnApplicationPause(bool pauseStatus)
-	{
-		if (pauseStatus) Pause();
-	}
+    void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus) Pause();
+    }
 
     void OnApplicationFocus(bool focusStatus)
     {
@@ -290,79 +289,79 @@ public class GameState : AState
     }
 
     public void Pause(bool displayMenu = true)
-	{
-		//check if we aren't finished OR if we aren't already in pause (as that would mess states)
-		if (m_Finished || AudioListener.pause == true)
-			return;
+    {
+        //check if we aren't finished OR if we aren't already in pause (as that would mess states)
+        if (m_Finished || AudioListener.pause == true)
+            return;
 
-		AudioListener.pause = true;
-		Time.timeScale = 0;
+        AudioListener.pause = true;
+        Time.timeScale = 0;
 
-		pauseButton.gameObject.SetActive(false);
-        pauseMenu.gameObject.SetActive (displayMenu);
-		wholeUI.gameObject.SetActive(false);
-		m_WasMoving = trackManager.isMoving;
-		trackManager.StopMove();
-	}
+        pauseButton.gameObject.SetActive(false);
+        pauseMenu.gameObject.SetActive(displayMenu);
+        wholeUI.gameObject.SetActive(false);
+        m_WasMoving = trackManager.isMoving;
+        trackManager.StopMove();
+    }
 
-	public void Resume()
-	{
-		Time.timeScale = 1.0f;
-		pauseButton.gameObject.SetActive(true);
-		pauseMenu.gameObject.SetActive (false);
-		wholeUI.gameObject.SetActive(true);
-		if (m_WasMoving)
-		{
-			trackManager.StartMove(false);
-		}
+    public void Resume()
+    {
+        Time.timeScale = 1.0f;
+        pauseButton.gameObject.SetActive(true);
+        pauseMenu.gameObject.SetActive(false);
+        wholeUI.gameObject.SetActive(true);
+        if (m_WasMoving)
+        {
+            trackManager.StartMove(false);
+        }
 
-		AudioListener.pause = false;
-	}
+        AudioListener.pause = false;
+    }
 
-	public void QuitToLoadout()
-	{
-		// Used by the pause menu to return immediately to loadout, canceling everything.
-		Time.timeScale = 1.0f;
-		AudioListener.pause = false;
-		trackManager.End();
-		trackManager.isRerun = false;
+    public void QuitToLoadout()
+    {
+        // Used by the pause menu to return immediately to loadout, canceling everything.
+        Time.timeScale = 1.0f;
+        AudioListener.pause = false;
+        trackManager.End();
+        trackManager.isRerun = false;
         PlayerData.instance.Save();
-		manager.SwitchState ("Loadout");
-	}
+        manager.SwitchState("Loadout");
+    }
 
     protected void UpdateUI()
     {
         coinText.text = trackManager.characterController.coins.ToString();
         premiumText.text = trackManager.characterController.premium.ToString();
 
-		for (int i = 0; i < 3; ++i)
-		{
+        for (int i = 0; i < 3; ++i)
+        {
 
-			if(trackManager.characterController.currentLife > i)
-			{
-				m_LifeHearts[i].color = Color.white;
-			}
-			else
-			{
-				m_LifeHearts[i].color = Color.black;
-			}
-		}
+            if (trackManager.characterController.currentLife > i)
+            {
+                m_LifeHearts[i].color = Color.white;
+            }
+            else
+            {
+                m_LifeHearts[i].color = Color.black;
+            }
+        }
 
         scoreText.text = trackManager.score.ToString();
         multiplierText.text = "x " + trackManager.multiplier;
 
-		distanceText.text = Mathf.FloorToInt(trackManager.worldDistance).ToString() + "m";
+        distanceText.text = Mathf.FloorToInt(trackManager.worldDistance).ToString() + "m";
 
-		if (trackManager.timeToStart >= 0)
-		{
-			countdownText.gameObject.SetActive(true);
-			countdownText.text = Mathf.Ceil(trackManager.timeToStart).ToString();
-			m_CountdownRectTransform.localScale = Vector3.one * (1.0f - (trackManager.timeToStart - Mathf.Floor(trackManager.timeToStart)));
-		}
-		else
-		{
-			m_CountdownRectTransform.localScale = Vector3.zero;
-		}
+        if (trackManager.timeToStart >= 0)
+        {
+            countdownText.gameObject.SetActive(true);
+            countdownText.text = Mathf.Ceil(trackManager.timeToStart).ToString();
+            m_CountdownRectTransform.localScale = Vector3.one * (1.0f - (trackManager.timeToStart - Mathf.Floor(trackManager.timeToStart)));
+        }
+        else
+        {
+            m_CountdownRectTransform.localScale = Vector3.zero;
+        }
 
         // Consumable
         if (trackManager.characterController.inventory != null)
@@ -374,10 +373,10 @@ public class GameState : AState
             inventoryIcon.transform.parent.gameObject.SetActive(false);
     }
 
-	IEnumerator WaitForGameOver()
-	{
-		m_Finished = true;
-		trackManager.StopMove();
+    IEnumerator WaitForGameOver()
+    {
+        m_Finished = true;
+        trackManager.StopMove();
 
         // Reseting the global blinking value. Can happen if game unexpectly exited while still blinking
         Shader.SetGlobalFloat("_BlinkingValue", 0.0f);
@@ -390,7 +389,7 @@ public class GameState : AState
             else
                 OpenGameOverPopup();
         }
-	}
+    }
 
     protected void ClearPowerup()
     {
@@ -476,7 +475,7 @@ public class GameState : AState
 #endif
         }
 #else
-		GameOver();
+        GameOver();
 #endif
     }
 
@@ -560,7 +559,7 @@ public class GameState : AState
 
     void DisplayTutorial(bool value)
     {
-        if(value)
+        if (value)
             Pause(false);
         else
         {
